@@ -1,25 +1,54 @@
-const { User, Tweet, Like } = require('../models');
+const { Op } = require('sequelize');
+const { User, Tweet, sequelize } = require('../models');
 
 const adminController = {
   getUsers: async (req, res, next) => {
     try {
       const users = await User.findAll({
-        attributes: ['id', 'account', 'name', 'avatar', 'coverImage', 'role'],
+        where: {
+          account: {
+            [Op.ne]: 'root', // Exclude user with account value 'root'
+          },
+        },
+        attributes: [
+          'id',
+          'account',
+          'name',
+          'avatar',
+          'coverImage',
+          'role',
+          [
+            sequelize.literal(
+              '(SELECT COUNT(follower_id) FROM Followships WHERE following_id = User.id)'
+            ),
+            'FollowersCount',
+          ],
+          [
+            sequelize.literal(
+              '(SELECT COUNT(following_id) FROM Followships WHERE follower_id = User.id)'
+            ),
+            'FollowingsCount',
+          ],
+          [
+            sequelize.literal(
+              '(SELECT COUNT(User_id) FROM Tweets WHERE User_id = User.id)'
+            ),
+            'TweetsCount',
+          ],
+        ],
         raw: true,
         nest: true,
-        include: [
-          {
-            model: User,
-            as: 'Followers',
-            attributes: ['id', 'account', 'name'],
-          },
-          { model: User, as: 'Followings' },
-          { model: Tweet },
-          { model: Like },
+      });
+
+      const tweets = await Tweet.findAll({
+        attributes: ['User_id', 'description', 'created_at'],
+        order: [
+          ['User_id', 'ASC'],
+          ['created_at', 'DESC'],
         ],
       });
 
-      return res.status(200).json(users);
+      return res.status(200).json({ users, tweets });
     } catch (err) {
       return next(err);
     }
