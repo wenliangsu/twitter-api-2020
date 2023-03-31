@@ -61,7 +61,8 @@
     </form>
     <script src="/socket.io/socket.io.js"></script>
     <script>
-      const socket = io();
+      // token for test (not work)
+      const socket = io({auth: {token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiYWNjb3VudCI6InVzZXIyIiwibmFtZSI6InVzZXIyIiwicm9sZSI6InVzZXIifQ.xOVKK8m2pz4vEcB77sofJI-sT7Gu5cs5OL4F6SQm7PU"}});
       const form = document.getElementById('form');
       const input = document.getElementById('input');
 
@@ -76,7 +77,7 @@
         }
       });
 
-      socket.emit('joinRoom', {id: 1, name: 'Nick'})
+      socket.emit('joinPublicRoom', {id: 1, name: 'Nick'})  // doesn't work if user socketAuth
    
       // Message from server
       socket.on('message', function (msg) {

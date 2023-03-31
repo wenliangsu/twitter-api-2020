@@ -22,7 +22,7 @@ module.exports = {
     if (!io) throw new Error('No socket io server instance');
     io.use(socketAuth).on('connection', (socket) => {
       // join room
-      socket.on('joinRoom', () => {
+      socket.on('joinPublicRoom', () => {
         // welcome current user
         socket.emit('message', 'Welcome to Chat');
         // add user into list
@@ -37,7 +37,12 @@ module.exports = {
       });
       // run when client disconnect
       socket.on('disconnect', () => {
-        io.emit('message', 'a user has left that chat');
+        const index = users.findIndex((user) => user.id === socket.user.id);
+
+        if (index !== -1) {
+          return users.splice(index, 1);
+        }
+        io.emit('message', `${socket.user.name} has left that chat`);
       });
     });
   },
