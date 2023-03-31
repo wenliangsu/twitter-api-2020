@@ -55,6 +55,10 @@ router.use('/tweets', authenticated, authenticatedUser, tweet);
 
 router.use('/followships', authenticated, authenticatedUser, followships);
 
+router.get('/chatroom', (req, res) => {
+  res.sendFile(__dirname + '/views/index.html');
+});
+
 router.get('/', (req, res) =>
   res.send(`You did not pass the authentication. Here is routes/index.js
 `)
